@@ -1,48 +1,28 @@
 """
-Database Schemas
+Database Schemas for Barber Booking App
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model maps to a MongoDB collection (lowercased class name).
 """
-
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Literal
 
-# Example schemas (replace with your own):
+class Service(BaseModel):
+    title: str = Field(..., description="Service name, e.g., Haircut")
+    duration_minutes: int = Field(30, ge=10, le=240, description="Service length in minutes")
+    price: float = Field(0, ge=0, description="Price in dollars")
+    description: Optional[str] = Field(None, description="Optional description")
 
-class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+class Barber(BaseModel):
+    name: str = Field(..., description="Barber full name")
+    bio: Optional[str] = Field(None, description="Short bio")
+    active: bool = Field(True, description="Is the barber taking bookings")
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Booking(BaseModel):
+    customer_name: str = Field(..., description="Customer full name")
+    phone: str = Field(..., description="Contact phone number")
+    service_id: str = Field(..., description="ID of the selected service")
+    date: str = Field(..., description="Booking date YYYY-MM-DD")
+    time: str = Field(..., description="Start time HH:MM (24h)")
+    barber_id: Optional[str] = Field(None, description="Optional barber preference")
+    status: Literal["pending","confirmed","cancelled"] = Field("confirmed")
+    notes: Optional[str] = Field(None)
